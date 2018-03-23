@@ -24,11 +24,11 @@ shinyUI(fluidPage(
   
   fluidRow(style = "background-color:#F2F2F2; margin-top: 30px; margin-bottom: 30px; padding: 10px",
            column(
-             width = 4,
+             width = 12,
              # Introduction text:
              p(
                tags$b("Description:"),
-               "This model explore the way that individual confirmation bias along with hyperbole and cherry-picking of events in the news media can lead to belief polarization."
+               "This model explore the way that individual confirmation bias along with selective representation of events via the news media can lead to belief polarization. Individuals may begin with initial beliefs and a tendency to accept evidence congenial their beliefs and reject evidence uncongenial to their beliefs. The news media, on the other hand, tends to introduce several forms of distortion: (1) hyperbole, where the news presents events as more extreme than they truly are; (2) cherry-picking, where the news omit events are not sufficiently extreme; or forced balance, where the news presents both positive and negative sides of an issue with equal frequency."
              )
            )),
   
@@ -40,17 +40,19 @@ shinyUI(fluidPage(
       fluidRow(
         sliderInput(
           "trueStateMean",
-          "Mean \\(\\mu\\):",
+          "True Mean \\(\\mu\\):",
           min = -5,
           max = 5,
-          value = 0
+          value = 0,
+          step = 0.5
         ),
         sliderInput(
           "trueStateSD",
-          "Standard Deviation \\(\\sigma\\):",
-          min = 0,
+          "True Standard Deviation \\(\\sigma\\):",
+          min = 1,
           max = 5,
-          value = 1
+          value = 1,
+          step = 0.5
         )
       ), 
       
@@ -60,7 +62,8 @@ shinyUI(fluidPage(
         "Hyperbole by the news:",
         min = 1,
         max = 5,
-        value = 1.5
+        value = 1.5,
+        step = 0.5
       ),
       
       # Cherry-picking of extreme events by news
@@ -68,14 +71,15 @@ shinyUI(fluidPage(
         "cherryPicking",
         "Cherry-picking of extreme events by the news:",
         min = 0,
-        max = 1,
-        value = 0.2
+        max = 5,
+        value = 0.5,
+        step = 0.5
       ),
       
       # Individual confirmation bias
       sliderInput(
         "individualBias",
-        "Individual confirmation bias \\(\\beta)\\:",
+        "Individual confirmation bias \\(\\beta\\):",
         min = -5,
         max = 5,
         value = 0
@@ -85,9 +89,9 @@ shinyUI(fluidPage(
     
     # Main Panel with Stationary Distribution + Simulation & Stats Panels
     mainPanel(
-      plotOutput("trueStatePlotOutput", height = "350px"),
-      plotOutput("newsAppearancePlotOutput", height = "350px"),
-      plotOutput("IndividualBeliefPlotOutput", height = "350px")
+      plotOutput("trueStatePlotOutput", height = "250px"),
+      plotOutput("newsAppearancePlotOutput", height = "250px"),
+      plotOutput("IndividualBeliefPlotOutput", height = "250px")
     )
   )
 ))

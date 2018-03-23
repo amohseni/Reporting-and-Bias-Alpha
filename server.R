@@ -70,7 +70,7 @@ shinyServer(function(input, output, session) {
       ggtitle("True State of the World") +
       labs(x = "Events", y = "Objective Probability") +
       scale_x_continuous(limits = c(-10, 10)) +
-      scale_y_continuous(limits = c(0, 1)) +
+      scale_y_continuous(limits = c(0, 0.75)) +
       scale_fill_manual(values = c("orange2")) +
       scale_color_manual(values = c("orange2")) +
       theme(
@@ -112,10 +112,10 @@ shinyServer(function(input, output, session) {
         alpha = 0.5
       ) +
       theme_minimal() +
-      ggtitle("Appearance of the World") +
+      ggtitle("Appearance of the World Through the News Media") +
       labs(x = "Events", y = "Broadcast Probability") +
       scale_x_continuous(limits = c(-10, 10)) +
-      scale_y_continuous(limits = c(0, 1)) +
+      scale_y_continuous(limits = c(0, 0.75)) +
       scale_fill_manual(values = c("darkred")) +
       scale_color_manual(values = c("darkred")) +
       theme(
@@ -158,10 +158,10 @@ shinyServer(function(input, output, session) {
         alpha = 0.5
       ) +
       theme_minimal() +
-      ggtitle("Individual Belief") +
+      ggtitle("Individual Subjective Belief About the World") +
       labs(x = "Events", y = "Perceived Probability") +
       scale_x_continuous(limits = c(-10, 10)) +
-      scale_y_continuous(limits = c(0, 1)) +
+      scale_y_continuous(limits = c(0, 0.75)) +
       scale_fill_manual(values = c("darkblue")) +
       scale_color_manual(values = c("darkblue")) +
       theme(
