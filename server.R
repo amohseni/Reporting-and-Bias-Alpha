@@ -19,28 +19,59 @@ shinyServer(function(input, output, session) {
     TrueStateSD <- as.numeric(input$trueStateSD)
     WorldDistribution <-
       sapply(x, dnorm, mean = TrueStateMean, sd = TrueStateSD)
-    NormalizaingFactor <- sum(WorldDistribution)
+    NormalizingFactor <- sum(WorldDistribution)
     
     # Create the distribution of events for the appearance portrayed by news media
     Hyperbole <- as.numeric(input$hyperbole)
     NewsMean <- TrueStateMean
     NewsSD <- Hyperbole * TrueStateSD
-    NewsDistribution <- sapply(x, dnorm, mean = NewsMean, sd = NewsSD)
+    NewsDistribution <-
+      sapply(x, dnorm, mean = NewsMean, sd = NewsSD)
     CherryPicking <- as.numeric(input$cherryPicking)
-    NewsDistribution[which(-CherryPicking < x & x < CherryPicking)] <- 0
-    NewsDistribution <- NewsDistribution * (NormalizaingFactor / sum(NewsDistribution)) # renormalize
+    NewsDistribution[which(-CherryPicking < x &
+                             x < CherryPicking)] <- 0
+    if (as.numeric(input$fairAndBalanced) == 1) {
+      NewsDistribution[which(x < 0)] <-
+        NewsDistribution[which(x < 0)] * (sum(NewsDistribution[which(x > 0)]) / (sum(NewsDistribution[which(x < 0)])))
+    }
+    NewsDistribution <-
+      NewsDistribution * (NormalizingFactor / sum(NewsDistribution)) # renormalize
+    data <-
+      sample(x,
+             size = 10000,
+             prob = NewsDistribution,
+             replace = TRUE)
+    meanNews <- mean(data)
+    sdNews <- sd(data)
     
-    # Create the distribution of events for the beliefs of individuals
+    # Create the pior & posterior distributions of beliefs of an individual
     Bias <- as.numeric(input$individualBias)
-    IndividualDismissal <- sapply(x, dnorm, mean = Bias)
-    IndividualBeliefDistribution <- IndividualDismissal * NewsDistribution
-    IndividualBeliefDistribution <- IndividualBeliefDistribution * (NormalizaingFactor / sum(IndividualBeliefDistribution)) # renormalize
+    IndividualBias <-
+      sapply(x, dnorm, mean = Bias, sd = TrueStateSD)
+    IndividualPerception <- IndividualBias * NewsDistribution
+    IndividualPerception <-
+      IndividualPerception * (NormalizingFactor / sum(IndividualPerception)) # renormalize
+    data <-
+      sample(x,
+             size = 10000,
+             prob = IndividualPerception,
+             replace = TRUE)
+    meanPerception <- mean(data)
+    sdPerception <- sd(data)
+    IndividualPerceptionParam <-
+      sapply(x, dnorm, mean = meanPerception, sd = sdPerception)
     
     # OUTPUT the data for the plots
     h <-
-      list(WorldDistribution,
-           NewsDistribution,
-           IndividualBeliefDistribution)
+      list(
+        WorldDistribution,
+        NewsDistribution,
+        IndividualBias,
+        IndividualPerception,
+        IndividualPerceptionParam,
+        c(meanNews, sdNews),
+        c(meanPerception, sdPerception)
+      )
     return(h)
     
   })
@@ -67,8 +98,8 @@ shinyServer(function(input, output, session) {
         alpha = 0.5
       ) +
       theme_minimal() +
-      ggtitle("True State of the World") +
-      labs(x = "Events", y = "Objective Probability") +
+      ggtitle("True Distribution of Evidence") +
+      labs(x = "Events", y = "Objective Frequency") +
       scale_x_continuous(limits = c(-10, 10)) +
       scale_y_continuous(limits = c(0, 0.75)) +
       scale_fill_manual(values = c("orange2")) +
@@ -112,12 +143,12 @@ shinyServer(function(input, output, session) {
         alpha = 0.5
       ) +
       theme_minimal() +
-      ggtitle("Appearance of the World Through the News Media") +
-      labs(x = "Events", y = "Broadcast Probability") +
+      ggtitle("Appearance of Evidence Through the News Media") +
+      labs(x = "Events", y = "Reported Frequency") +
       scale_x_continuous(limits = c(-10, 10)) +
       scale_y_continuous(limits = c(0, 0.75)) +
-      scale_fill_manual(values = c("darkred")) +
-      scale_color_manual(values = c("darkred")) +
+      scale_fill_manual(values = c("darkorange3")) +
+      scale_color_manual(values = c("darkorange3")) +
       theme(
         plot.title = element_text(
           hjust = 0.5,
@@ -138,10 +169,11 @@ shinyServer(function(input, output, session) {
   # PLOT 1: State of the world distribution
   output$IndividualBeliefPlotOutput <- renderPlot({
     # Import computed distribution
-    IndividualBelief <- computeDynamics()[[3]]
+    Bias <- computeDynamics()[[3]]
+    Perception <- computeDynamics()[[5]]
     # Format and label the imported data
     IndividualBeliefPlot <-
-      melt(data.frame(x, IndividualBelief), id.vars = 'x')
+      melt(data.frame(x, Bias, Perception), id.vars = 'x')
     colnames(IndividualBeliefPlot) <-
       c("Evidence",  "Distribution", "Probability")
     # Create the ggplot
@@ -155,22 +187,35 @@ shinyServer(function(input, output, session) {
           fill = Distribution,
           color = Distribution
         ),
-        alpha = 0.5
+        alpha = 0.5,
+        position = "identity"
       ) +
+      coord_cartesian(ylim = c(0, 0.75)) +
       theme_minimal() +
-      ggtitle("Individual Subjective Belief About the World") +
-      labs(x = "Events", y = "Perceived Probability") +
+      ggtitle("Individual Perception of Evidence") +
+      labs(x = "Events", y = "Subjective Probability") +
       scale_x_continuous(limits = c(-10, 10)) +
-      scale_y_continuous(limits = c(0, 0.75)) +
-      scale_fill_manual(values = c("darkblue")) +
-      scale_color_manual(values = c("darkblue")) +
+      scale_fill_manual(values = c("pink", "firebrick2")) +
+      scale_color_manual(values = c("pink", "firebrick2")) +
+      guides(fill = guide_legend(
+        keywidth = 0.4,
+        keyheight = 0.4,
+        default.unit = "inch"
+      )) +
       theme(
         plot.title = element_text(
           hjust = 0.5,
           margin = margin(b = 10, unit = "pt"),
           lineheight = 1.15
         ),
-        legend.position = "none",
+        legend.title = element_blank(),
+        legend.position = c(0.85, 0.6),
+        legend.background = element_rect(
+          colour = 'white',
+          fill = 'white',
+          size = 3
+        ),
+        legend.text = element_text(size = 16),
         axis.text.x = element_blank(),
         axis.text.y = element_blank(),
         axis.title.x =  element_text(margin = margin(t = 5, unit = "pt")),
@@ -179,6 +224,51 @@ shinyServer(function(input, output, session) {
       )
     # Plot the final graph
     print(Z)
+  })
+  
+  output$ui1params <- renderUI({
+    withMathJax(HTML(
+      paste(
+        "<h5>\\(\\mu_{Objective}=\\) ",
+        as.numeric(input$trueStateMean),
+        ", \\(\\quad \\sigma_{Objective}=\\) ",
+        as.numeric(input$trueStateSD),
+        "</h5>",
+        sep = ""
+      )
+    ))
+  })
+  
+  output$ui2params <- renderUI({
+    meanNews <- round(computeDynamics()[[6]][1], digits = 1)
+    sdNews <- round(computeDynamics()[[6]][2], digit = 1)
+    withMathJax(HTML(
+      paste(
+        "<h5>\\(\\mu_{Reported}=\\) ",
+        meanNews,
+        ", \\(\\quad \\sigma_{Reported}=\\) ",
+        sdNews,
+        "</h5>",
+        sep = ""
+      )
+    ))
+  })
+  
+  output$ui3params <- renderUI({
+    meanPerception <- round(computeDynamics()[[7]][1], digits = 1)
+    sdPerception <- round(computeDynamics()[[7]][2], digit = 1)
+    withMathJax(HTML(
+      paste(
+        "<h5>\\(\\beta_{Bias}=\\) ",
+        as.numeric(input$individualBias),
+        ", \\(\\quad \\mu_{Perceived}=\\) ",
+        meanPerception,
+        ", \\(\\quad \\sigma_{Perceived}=\\) ",
+        sdPerception,
+        "</h5>",
+        sep = ""
+      )
+    ))
   })
   
   

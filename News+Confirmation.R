@@ -17,9 +17,9 @@ News <- News * (10 / sum(News)) # renormalize
 
 # Fixed bias individuals
 Bias <- 0
-IndividualDismissal <- sapply(x, dnorm, mean = Bias)
-IndividualBelief <- IndividualDismissal * News
-IndividualBelief <- IndividualBelief * (10 / sum(IndividualBelief)) # renormalize
+IndividualPrior <- sapply(x, dnorm, mean = Bias)
+IndividualPosterior <- IndividualPrior * News
+IndividualPosterior <- IndividualPosterior * (sum(IndividualPrior) / sum(IndividualPosterior)) # renormalize
 
 # Plot TRUE STATE OF THE WORLD distribution
 WorldPlot <- melt(data.frame(x, World), id.vars = 'x')
@@ -84,33 +84,54 @@ ggplot(NewsPlot) +
   )
 
 # Plot INDIVIDUAL BELIEF distribution
-IndividualBeliefPlot <- melt(data.frame(x, IndividualBelief), id.vars = 'x')
-colnames(IndividualBeliefPlot) <- c("Evidence",  "Distribution", "Probability")
-ggplot(IndividualBeliefPlot) +
+IndividualPosteriorPlot <- melt(data.frame(x, IndividualPrior, IndividualPosterior), id.vars = 'x')
+colnames(IndividualPosteriorPlot) <- c("Evidence",  "Distribution", "Probability")
+ggplot(IndividualPosteriorPlot) +
   geom_area(
-    data = IndividualBeliefPlot,
+    data = IndividualPosteriorPlot,
     size = 1,
     aes(x = Evidence, y = Probability, fill = Distribution, color = Distribution),
-    alpha = 0.5
+    alpha = 0.5,
+    position = "identity"
   ) +
   theme_minimal() +
   ggtitle("Individual Belief") +
   labs(x = "Events", y = "Perceived Probability") +
   scale_x_continuous(limits = c(-10, 10)) +
   scale_y_continuous(limits = c(0, 1)) +
-  scale_fill_manual(values = c("darkblue")) +
-  scale_color_manual(values = c("darkblue")) +
+  scale_fill_manual(values = c("lightblue", "darkblue")) +
+  scale_color_manual(values = c("lightblue", "darkblue")) +
   theme(
     plot.title = element_text(
       hjust = 0.5,
       margin = margin(b = 10, unit = "pt"),
       lineheight = 1.15
     ),
-    legend.position = "none",
+    legend.title = element_blank(),
+    legend.position = c(0.85, 0.6),
+    legend.background = element_rect(
+      colour = 'white',
+      fill = 'white',
+      size = 3
+    ),
+    legend.text = element_text(size = 16),
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
     axis.title.x =  element_text(margin = margin(t = 5, unit = "pt")),
     axis.title.y =  element_text(margin = margin(r = 5, unit = "pt")),
     text = element_text(size = 16)
   )
+
+length(IndividualPrior)
+length(IndividualPosterior)
+max(IndividualPrior)
+max(IndividualPosterior)
+mean(IndividualPrior)
+mean(IndividualPosterior)
+print(sum(IndividualPrior))
+print(sum(IndividualPosterior))
+plot(x, IndividualPrior, type="l", col="blue", pch="o", lty=1, ylim=c(0,1), ylab="y" )
+lines(x, IndividualPosterior, col = "red")
+legend(1, 0.5, legend=c("Line 1", "Line 2"), col=c("red", "blue"), lty=1:2, cex=0.8)
+
 
