@@ -17,7 +17,7 @@ shinyUI(fluidPage(
   includeCSS("www/style.css"),
   
   # Title
-  titlePanel("News, Confirmation Bias, and Belief Polarization"),
+  titlePanel("Reporting, Bias, and Belief Distortion"),
   
   # Load MathJax
   withMathJax(),
@@ -33,7 +33,7 @@ shinyUI(fluidPage(
            column(
              width = 6,
              div(HTML(
-               "We consider several ways in which the news media may select or distort events: (1) <strong>hyperbole</strong>, where the news presents events as more extreme than they truly are; (2) <strong>cherry-picking</strong>, where the news omits events are not sufficiently extreme; or (3) <strong>'fair-and-balanced'</strong> reporting, where the news presents both positive and negative sides of an issue with equal frequency regardless of the true underlying distribution. Each form of distortion has its own characteristics effects."
+               "We consider several ways in which the news media may select or distort events: (1) <strong>hyperbole</strong>, where the news presents events as more extreme than they truly are; (2) <strong>cherry-picking</strong>, where the news omits events are not sufficiently extreme; or (3) <strong>fair-and-balanced</strong> reporting, where the news presents both positive and negative sides of an issue with equal frequency regardless of the true underlying distribution. Each form of distortion has its own characteristics effects."
              ))
            )), 
   

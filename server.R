@@ -24,16 +24,20 @@ shinyServer(function(input, output, session) {
     # Create the distribution of events for the appearance portrayed by news media
     Hyperbole <- as.numeric(input$hyperbole)
     NewsMean <- TrueStateMean
-    NewsSD <- Hyperbole * TrueStateSD
+    NewsSD <- TrueStateSD
+    # Apply hyperbole distortion
     NewsDistribution <-
-      sapply(x, dnorm, mean = NewsMean, sd = NewsSD)
+      sapply(x / Hyperbole, dnorm, mean = NewsMean, sd = NewsSD)
+    # Apply cherry picking distortion
     CherryPicking <- as.numeric(input$cherryPicking)
     NewsDistribution[which(-CherryPicking < x &
                              x < CherryPicking)] <- 0
+    # Apply fair-and-balanced distortion
     if (as.numeric(input$fairAndBalanced) == 1) {
       NewsDistribution[which(x < 0)] <-
         NewsDistribution[which(x < 0)] * (sum(NewsDistribution[which(x > 0)]) / (sum(NewsDistribution[which(x < 0)])))
     }
+    # Re-normalize distribution
     NewsDistribution <-
       NewsDistribution * (NormalizingFactor / sum(NewsDistribution)) # renormalize
     data <-
@@ -41,6 +45,7 @@ shinyServer(function(input, output, session) {
              size = 10000,
              prob = NewsDistribution,
              replace = TRUE)
+    # Output summary statistics
     meanNews <- mean(data)
     sdNews <- sd(data)
     
@@ -98,8 +103,8 @@ shinyServer(function(input, output, session) {
         alpha = 0.5
       ) +
       theme_minimal() +
-      ggtitle("True Distribution of Evidence") +
-      labs(x = "Events", y = "Objective Frequency") +
+      ggtitle("Objective Distribution of Evidence") +
+      labs(x = "Evidence", y = "Objective Frequency") +
       scale_x_continuous(limits = c(-10, 10)) +
       scale_y_continuous(limits = c(0, 0.75)) +
       scale_fill_manual(values = c("orange2")) +
@@ -143,8 +148,8 @@ shinyServer(function(input, output, session) {
         alpha = 0.5
       ) +
       theme_minimal() +
-      ggtitle("Appearance of Evidence Through the News Media") +
-      labs(x = "Events", y = "Reported Frequency") +
+      ggtitle("Reported Distribution of Evidence") +
+      labs(x = "Evidence", y = "Reported Frequency") +
       scale_x_continuous(limits = c(-10, 10)) +
       scale_y_continuous(limits = c(0, 0.75)) +
       scale_fill_manual(values = c("darkorange3")) +
@@ -193,7 +198,7 @@ shinyServer(function(input, output, session) {
       coord_cartesian(ylim = c(0, 0.75)) +
       theme_minimal() +
       ggtitle("Individual Perception of Evidence") +
-      labs(x = "Events", y = "Subjective Probability") +
+      labs(x = "Evidence", y = "Subjective Probability") +
       scale_x_continuous(limits = c(-10, 10)) +
       scale_fill_manual(values = c("pink", "firebrick2")) +
       scale_color_manual(values = c("pink", "firebrick2")) +
@@ -226,6 +231,7 @@ shinyServer(function(input, output, session) {
     print(Z)
   })
   
+  # Print to UI: statistics of objective distribution
   output$ui1params <- renderUI({
     withMathJax(HTML(
       paste(
@@ -239,6 +245,7 @@ shinyServer(function(input, output, session) {
     ))
   })
   
+  # Print to UI: statistics of reported distribution
   output$ui2params <- renderUI({
     meanNews <- round(computeDynamics()[[6]][1], digits = 1)
     sdNews <- round(computeDynamics()[[6]][2], digit = 1)
@@ -254,6 +261,7 @@ shinyServer(function(input, output, session) {
     ))
   })
   
+  # Print to UI: statistics of belief distribution
   output$ui3params <- renderUI({
     meanPerception <- round(computeDynamics()[[7]][1], digits = 1)
     sdPerception <- round(computeDynamics()[[7]][2], digit = 1)
