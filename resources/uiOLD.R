@@ -27,7 +27,7 @@ shinyUI(fluidPage(
              width = 6,
              # Introduction text:
              div(HTML(
-               "<strong>Description:</strong> This model explores the way that individual confirmation bias along with selective or distorted representations of events by the news media can lead to individual belief polarization. There is a true distribution of events which occur and are then selected and/or distorted by the news. Individuals begin with prior beliefs and a tendency to accept news congenial those beliefs and reject news uncongenial to those beliefs. Upon hearing the news, individuals select which new items to trust, given their biases, and update their beliefs accordingly."
+               "<strong>Description:</strong> This model explore the way that individual confirmation bias along with selective or distorted representations of events by the news media can lead to individual belief polarization. There is a true distribution of events which occur and are then selected and/or distorted by the news. Individuals begin with prior beliefs and a tendency to accept news congenial those beliefs and reject news uncongenial to those beliefs. Upon hearing the news, individuals select which new items to trust, given their biases, and update their beliefs accordingly."
              ))
            ),
            column(
@@ -46,7 +46,7 @@ shinyUI(fluidPage(
         "True mean \\(\\mu\\):",
         min = -5,
         max = 5,
-        value = 1,
+        value = 0,
         step = 0.5
       ),
       sliderInput(
@@ -75,8 +75,8 @@ shinyUI(fluidPage(
         "Cherry-picking of extreme events by the news \\(p\\):",
         min = 0,
         max = 5,
-        value = 1,
-        step = 0.25
+        value = 0,
+        step = 0.5
       ),
       
       # "Fair-and-balanced" reporting of events by the news
@@ -91,18 +91,8 @@ shinyUI(fluidPage(
         "Individual confirmation bias \\(\\beta\\):",
         min = -5,
         max = 5,
-        value = -1,
+        value = 0,
         step = 0.5
-      ),
-      
-      # Weight of reports vs. individual bias
-      sliderInput(
-        "weightOfEvidence",
-        "Weight of evidence vs. individual bias \\(w\\):",
-        min = 0,
-        max = 1,
-        value = 0.5,
-        step = 0.05
       )
       
     ),

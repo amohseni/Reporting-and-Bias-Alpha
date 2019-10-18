@@ -27,7 +27,7 @@ shinyServer(function(input, output, session) {
     NewsSD <- TrueStateSD
     # Apply hyperbole distortion
     NewsDistribution <-
-      sapply(x, dnorm, mean = Hyperbole * NewsMean, sd = Hyperbole * NewsSD)
+      sapply(x / Hyperbole, dnorm, mean = NewsMean, sd = NewsSD)
     # Apply cherry picking distortion
     CherryPicking <- as.numeric(input$cherryPicking)
     NewsDistribution[which(-CherryPicking < x &
@@ -49,16 +49,22 @@ shinyServer(function(input, output, session) {
     meanNews <- mean(data)
     sdNews <- sd(data)
     
-    # Create the prior & posterior distributions of beliefs of an individual
+    # Create the pior & posterior distributions of beliefs of an individual
     Bias <- as.numeric(input$individualBias)
-    IndividualBias <- sapply(x, dnorm, mean = Bias, sd = TrueStateSD)
-    # Update the number of reports observed by individuals
-    weightOfEvidence <- as.numeric(input$weightOfEvidence)
-    meanPerception <- (weightOfEvidence * meanNews) + ((1 - weightOfEvidence) * Bias)
-    # sdPerception <- ((n / sdNews) + (1 / TrueStateSD)) ^ (-1)
-    sdPerception <- (weightOfEvidence * sdNews) + ((1 - weightOfEvidence) * TrueStateSD)
-    IndividualPerception <- sapply(x, dnorm, mean = meanPerception, sd = sdPerception)
-    IndividualPerceptionParam <- IndividualPerception
+    IndividualBias <-
+      sapply(x, dnorm, mean = Bias, sd = TrueStateSD)
+    IndividualPerception <- IndividualBias * NewsDistribution
+    IndividualPerception <-
+      IndividualPerception * (NormalizingFactor / sum(IndividualPerception)) # renormalize
+    data <-
+      sample(x,
+             size = 10000,
+             prob = IndividualPerception,
+             replace = TRUE)
+    meanPerception <- mean(data)
+    sdPerception <- sd(data)
+    IndividualPerceptionParam <-
+      sapply(x, dnorm, mean = meanPerception, sd = sdPerception)
     
     # OUTPUT the data for the plots
     h <-

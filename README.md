@@ -1,2 +1,2 @@
 # ConfirmationBias-News-BeliefPolarization
-This model explore the way that individual confirmation bias along with hyperbole and cherry-picking of events in news media can lead to belief polarization.
+This model explores how news reporting can interact with confirmation bias to produce belief distortion.
