@@ -1,10 +1,12 @@
 name: ConfirmationBias-News-BeliefPolarization
 title: ConfirmationBias-News-BeliefPolarization
+username:
 account: amohseni
 server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
 appId: 312238
-bundleId: 1295691
+bundleId: 2512806
 url: https://amohseni.shinyapps.io/ConfirmationBias-News-BeliefPolarization/
-when: 1522461667.51233
+when: 1571433092.11918
 asMultiple: FALSE
 asStatic: FALSE

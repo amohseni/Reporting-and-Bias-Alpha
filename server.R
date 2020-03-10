@@ -1,4 +1,4 @@
-# NEWS, CONFIRMATION BIAS, AND BELIEF POLZRIZATION
+# NEWS, CONFIRMATION BIAS, AND BELIEF POLARIZATION
 # << SERVER >>
 # by Aydin Mohseni
 
@@ -27,7 +27,7 @@ shinyServer(function(input, output, session) {
     NewsSD <- TrueStateSD
     # Apply hyperbole distortion
     NewsDistribution <-
-      sapply(x, dnorm, mean = Hyperbole * NewsMean, sd = Hyperbole * NewsSD)
+      sapply(x, dnorm, mean = Hyperbole * NewsMean, sd = Hyperbole ^ 2 * NewsSD)
     # Apply cherry picking distortion
     CherryPicking <- as.numeric(input$cherryPicking)
     NewsDistribution[which(-CherryPicking < x &
@@ -46,17 +46,16 @@ shinyServer(function(input, output, session) {
              prob = NewsDistribution,
              replace = TRUE)
     # Output summary statistics
-    meanNews <- mean(data)
-    sdNews <- sd(data)
+    ReportedMean <- mean(data)
+    ReportedSD <- sd(data)
     
     # Create the prior & posterior distributions of beliefs of an individual
     Bias <- as.numeric(input$individualBias)
     IndividualBias <- sapply(x, dnorm, mean = Bias, sd = TrueStateSD)
     # Update the number of reports observed by individuals
     weightOfEvidence <- as.numeric(input$weightOfEvidence)
-    meanPerception <- (weightOfEvidence * meanNews) + ((1 - weightOfEvidence) * Bias)
-    # sdPerception <- ((n / sdNews) + (1 / TrueStateSD)) ^ (-1)
-    sdPerception <- (weightOfEvidence * sdNews) + ((1 - weightOfEvidence) * TrueStateSD)
+    meanPerception <- (weightOfEvidence * ReportedMean) + ((1 - weightOfEvidence) * Bias)
+    sdPerception <- (weightOfEvidence * ReportedSD) + ((1 - weightOfEvidence) * TrueStateSD)
     IndividualPerception <- sapply(x, dnorm, mean = meanPerception, sd = sdPerception)
     IndividualPerceptionParam <- IndividualPerception
     
@@ -68,7 +67,7 @@ shinyServer(function(input, output, session) {
         IndividualBias,
         IndividualPerception,
         IndividualPerceptionParam,
-        c(meanNews, sdNews),
+        c(ReportedMean, ReportedSD),
         c(meanPerception, sdPerception)
       )
     return(h)
